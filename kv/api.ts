@@ -4,9 +4,11 @@ import { z } from "https://deno.land/x/zod/mod.ts";
 
 const EnvSchema = z.object({
   DENO_KV_URL: z.string().min(1, { message: "env:DENO_KV_URL is required" }),
-  TODO_EXPIRE_DAYS_COMPLETED: z.number().default(30),
+  TODO_EXPIRE_DAYS_COMPLETED: z.coerce.number().default(30),
+  DEBUG: z.coerce.boolean().default(false),
 });
 const env = EnvSchema.parse(Deno.env.toObject());
+console.log("env: ", env);
 
 const kv = await Deno.openKv(env.DENO_KV_URL);
 const app = new Hono();
@@ -23,11 +25,18 @@ const TodoSchema = z.object({
 
 const bodyLogger = (): MiddlewareHandler => {
   return async (c, next) => {
-    console.log(await c.req.json());
+    try {
+      console.log("req: ", await c.req.json());
+    } catch (_) {
+      console.log("req: no body");
+    }
     await next();
+    console.log("res: ", await c.res.json());
   };
 };
-app.use("*", bodyLogger());
+if (env.DEBUG) {
+  app.use("*", bodyLogger());
+}
 app.use("*", logger());
 
 app.get("/", (c) => c.text("healthy"));
