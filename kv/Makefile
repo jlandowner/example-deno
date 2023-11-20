@@ -7,6 +7,10 @@ docker-kv:
 			--sqlite-path /data/denokv.sqlite serve \
 			--access-token $(DENO_KV_ACCESS_TOKEN)
 
-.PHONY: run
-run:
-	DENO_KV_ACCESS_TOKEN=$(DENO_KV_ACCESS_TOKEN) deno run --unstable -A main.ts
+.PHONY: run-example
+run-example:
+	DENO_KV_ACCESS_TOKEN=$(DENO_KV_ACCESS_TOKEN) deno run --unstable -A example.ts
+
+.PHONY: run-api
+run-api:
+	DENO_KV_ACCESS_TOKEN=$(DENO_KV_ACCESS_TOKEN) DENO_KV_URL="http://0.0.0.0:4512" deno run --unstable -A api.ts
